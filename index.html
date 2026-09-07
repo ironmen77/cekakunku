@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ambil Akun Siswa</title>
+<title>Cek Akunmu di Sini!</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* ============================================================
@@ -25,10 +25,14 @@
   --garis:#c9d5d0;
   --redup:#5c6f74;
   --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --judul:"Anton",'Archivo Black',system-ui,sans-serif;
   --r:10px;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
+
+::selection{background:var(--peluit);color:var(--papan)}
+.kartu ::selection{background:var(--peluit);color:var(--papan)}
 
 html{-webkit-text-size-adjust:100%}
 
@@ -45,28 +49,23 @@ body{
 
 .bingkai{max-width:470px;margin:0 auto}
 
-.hero{position:relative;padding:56px 0 30px}
-
-.hero-lapangan{
-  position:absolute;inset:auto 0 0 0;top:26px;
-  width:100%;height:130px;
-  opacity:.16;pointer-events:none;
-}
+.hero{padding:58px 0 32px;text-align:center}
 
 .hero h1{
-  position:relative;
-  font-size:clamp(2.2rem,10vw,3.1rem);
-  font-weight:800;
-  letter-spacing:-.035em;
-  line-height:.98;
+  font-family:var(--judul);
+  font-size:clamp(2.5rem,11.5vw,3.5rem);
+  font-weight:400;
+  letter-spacing:.005em;
+  line-height:1;
+  text-transform:uppercase;
 }
 
 .hero p{
-  position:relative;
-  margin-top:14px;
+  margin:16px auto 0;
   font-size:1.02rem;
   color:var(--redup);
-  max-width:34ch;
+  max-width:32ch;
+  text-wrap:balance;
 }
 
 /* ---------- Formulir ---------- */
@@ -190,7 +189,14 @@ button:focus-visible{outline:3px solid rgba(242,164,19,.55);outline-offset:2px}
   margin-bottom:12px;
 }
 
-.kartu-nama{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.kartu-nama{
+  font-family:var(--judul);
+  font-size:1.62rem;
+  font-weight:400;
+  letter-spacing:.01em;
+  line-height:1.12;
+  text-transform:uppercase;
+}
 
 .kartu-isi{padding:18px 22px 22px}
 
@@ -443,22 +449,15 @@ td.mono{font-family:var(--mono);font-size:.85rem}
 <div class="bingkai">
 
   <header class="hero">
-    <svg class="hero-lapangan" viewBox="0 0 400 130" fill="none" aria-hidden="true">
-      <rect x="4" y="4" width="392" height="122" stroke="#10323f" stroke-width="2"/>
-      <line x1="200" y1="4" x2="200" y2="126" stroke="#10323f" stroke-width="2"/>
-      <circle cx="200" cy="65" r="34" stroke="#10323f" stroke-width="2"/>
-      <rect x="4" y="32" width="46" height="66" stroke="#10323f" stroke-width="2"/>
-      <rect x="350" y="32" width="46" height="66" stroke="#10323f" stroke-width="2"/>
-    </svg>
-    <h1 id="judulHalaman">Ambil Akun Siswa</h1>
-    <p id="pesanPembuka">Memuat…</p>
+    <h1 id="judulHalaman">Cek Akunmu di Sini!</h1>
+    <p id="pesanPembuka">Pilih kelasmu, lalu tulis nama lengkap sesuai akta kelahiran.</p>
   </header>
 
   <main class="kotak" id="kotakForm">
     <div class="baris">
       <label for="pilihKelas">Kelas</label>
       <select id="pilihKelas" disabled>
-        <option value="">Memuat daftar kelas…</option>
+        <option value="">— pilih kelas —</option>
       </select>
     </div>
 
@@ -766,9 +765,8 @@ function muatInfo(){
       return;
     }
     infoHalaman = r;
-    el('judulHalaman').textContent = r.judul;
-    document.title = r.judul;
-    el('pesanPembuka').textContent = r.pesan;
+    if(r.judul){ el('judulHalaman').textContent = r.judul; document.title = r.judul; }
+    if(r.pesan){ el('pesanPembuka').textContent = r.pesan; }
 
     var pilih = el('pilihKelas');
     if(!r.kelas.length){
