@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ambil Akun Siswa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* ============================================================
+   PJOK Smart Assessment Pro — Ambil Akun Siswa
+   © Oryza Sativa N
+   ============================================================ */
+
+:root{
+  --kapur:#eef2ef;
+  --kapur-tua:#e2e8e4;
+  --papan:#10323f;
+  --papan-2:#1b4a5c;
+  --peluit:#f2a413;
+  --rumput:#2e8b57;
+  --bata:#bd4028;
+  --garis:#c9d5d0;
+  --redup:#5c6f74;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --r:10px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html{-webkit-text-size-adjust:100%}
+
+body{
+  font-family:"Archivo",system-ui,sans-serif;
+  background:var(--kapur);
+  color:var(--papan);
+  line-height:1.55;
+  min-height:100vh;
+  padding:0 20px 120px;
+}
+
+/* ---------- Kerangka halaman siswa ---------- */
+
+.bingkai{max-width:470px;margin:0 auto}
+
+.hero{position:relative;padding:56px 0 30px}
+
+.hero-lapangan{
+  position:absolute;inset:auto 0 0 0;top:26px;
+  width:100%;height:130px;
+  opacity:.16;pointer-events:none;
+}
+
+.hero h1{
+  position:relative;
+  font-size:clamp(2.2rem,10vw,3.1rem);
+  font-weight:800;
+  letter-spacing:-.035em;
+  line-height:.98;
+}
+
+.hero p{
+  position:relative;
+  margin-top:14px;
+  font-size:1.02rem;
+  color:var(--redup);
+  max-width:34ch;
+}
+
+/* ---------- Formulir ---------- */
+
+.kotak{
+  background:#fff;
+  border:1px solid var(--garis);
+  border-radius:var(--r);
+  padding:22px 20px;
+}
+
+.baris{margin-bottom:18px}
+.baris:last-of-type{margin-bottom:0}
+
+label{
+  display:block;
+  font-size:.9rem;
+  font-weight:600;
+  margin-bottom:7px;
+}
+
+.bantu{
+  font-weight:400;
+  color:var(--redup);
+  font-size:.84rem;
+  margin-top:6px;
+}
+
+select,input[type=text],input[type=password],input[type=number],textarea{
+  width:100%;
+  font-family:inherit;
+  font-size:1rem;
+  padding:13px 14px;
+  border:1.5px solid var(--garis);
+  border-radius:8px;
+  background:#fff;
+  color:var(--papan);
+}
+
+select:focus,input:focus,textarea:focus{
+  outline:3px solid rgba(242,164,19,.4);
+  outline-offset:1px;
+  border-color:var(--peluit);
+}
+
+select:disabled,input:disabled{background:var(--kapur-tua);color:var(--redup)}
+
+button{
+  font-family:inherit;
+  cursor:pointer;
+  border:none;
+  border-radius:8px;
+  font-weight:600;
+}
+
+button:focus-visible{outline:3px solid rgba(242,164,19,.55);outline-offset:2px}
+
+.tombol-utama{
+  width:100%;
+  background:var(--peluit);
+  color:var(--papan);
+  font-size:1.05rem;
+  font-weight:700;
+  padding:15px;
+  margin-top:22px;
+}
+
+.tombol-utama:hover:not(:disabled){background:#dd9509}
+.tombol-utama:disabled{opacity:.5;cursor:not-allowed}
+
+/* ---------- Pesan ---------- */
+
+.pesan{
+  margin-top:16px;
+  padding:13px 15px;
+  border-radius:8px;
+  font-size:.94rem;
+  border-left:4px solid;
+}
+.pesan.salah{background:#fbeae6;border-color:var(--bata);color:#8a2d1c}
+.pesan.info{background:#e8f1ee;border-color:var(--rumput);color:#1d5c39}
+
+.petunjuk{margin-top:14px;padding:15px;background:var(--kapur-tua);border-radius:8px}
+.petunjuk h3{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.petunjuk .bantu{margin-bottom:10px}
+.petunjuk ul{list-style:none}
+.petunjuk li{
+  font-family:var(--mono);
+  font-size:.95rem;
+  letter-spacing:.06em;
+  padding:6px 0;
+  border-bottom:1px dashed var(--garis);
+}
+.petunjuk li:last-child{border-bottom:none}
+
+/* ---------- Kartu akun ---------- */
+
+.kartu{
+  margin-top:26px;
+  background:var(--papan);
+  color:#fff;
+  border-radius:var(--r);
+  overflow:hidden;
+}
+
+@media (prefers-reduced-motion:no-preference){
+  .kartu{animation:masuk .45s cubic-bezier(.2,.7,.3,1)}
+  @keyframes masuk{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+}
+
+.kartu-atas{padding:24px 22px 20px;border-bottom:1px solid rgba(255,255,255,.14)}
+
+.kartu-kelas{
+  display:inline-block;
+  background:var(--peluit);
+  color:var(--papan);
+  font-size:.78rem;
+  font-weight:700;
+  padding:4px 10px;
+  border-radius:5px;
+  margin-bottom:12px;
+}
+
+.kartu-nama{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+
+.kartu-isi{padding:18px 22px 22px}
+
+.data{margin-bottom:16px}
+.data:last-child{margin-bottom:0}
+
+.data-label{font-size:.82rem;color:#9db4bc;font-weight:500;margin-bottom:6px}
+
+.data-nilai{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(255,255,255,.08);
+  border-radius:8px;
+  padding:11px 12px;
+}
+
+.data-nilai span{
+  flex:1;
+  font-family:var(--mono);
+  font-size:.95rem;
+  word-break:break-all;
+  min-width:0;
+}
+
+.mini{
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  font-size:.8rem;
+  padding:7px 11px;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.mini:hover{background:rgba(255,255,255,.28)}
+
+.catatan-kartu{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.14);
+  font-size:.86rem;
+  color:#9db4bc;
+}
+
+.tombol-lagi{
+  width:100%;
+  margin-top:14px;
+  background:transparent;
+  border:1.5px solid var(--garis);
+  color:var(--papan);
+  padding:13px;
+  font-size:.95rem;
+}
+.tombol-lagi:hover{background:var(--kapur-tua)}
+
+/* ---------- Tombol admin ---------- */
+
+.tombol-admin{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  width:44px;height:44px;
+  border-radius:50%;
+  background:var(--papan);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  opacity:.5;
+  z-index:40;
+}
+.tombol-admin:hover,.tombol-admin:focus-visible{opacity:1}
+
+/* ---------- Panel admin ---------- */
+
+.tirai{
+  position:fixed;inset:0;
+  background:rgba(16,50,63,.55);
+  display:none;
+  align-items:flex-start;
+  justify-content:center;
+  padding:20px;
+  overflow-y:auto;
+  z-index:50;
+}
+.tirai.buka{display:flex}
+
+.panel{
+  background:var(--kapur);
+  border-radius:var(--r);
+  width:100%;
+  max-width:940px;
+  margin:auto;
+  overflow:hidden;
+}
+
+.panel-atas{
+  background:var(--papan);
+  color:#fff;
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.panel-atas h2{font-size:1.05rem;font-weight:600}
+
+.tutup{
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  width:32px;height:32px;
+  border-radius:6px;
+  font-size:1.1rem;
+  line-height:1;
+  flex-shrink:0;
+}
+.tutup:hover{background:rgba(255,255,255,.3)}
+
+.panel-isi{padding:20px}
+
+.tab-bar{
+  display:flex;
+  gap:4px;
+  overflow-x:auto;
+  border-bottom:1.5px solid var(--garis);
+  margin-bottom:20px;
+}
+
+.tab{
+  background:transparent;
+  color:var(--redup);
+  padding:11px 14px;
+  font-size:.92rem;
+  border-radius:0;
+  border-bottom:3px solid transparent;
+  white-space:nowrap;
+}
+.tab.aktif{color:var(--papan);border-bottom-color:var(--peluit);font-weight:600}
+
+.laman{display:none}
+.laman.tampil{display:block}
+
+/* ---------- Kartu statistik ---------- */
+
+.statistik{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:12px;
+  margin-bottom:22px;
+}
+
+.stat{background:#fff;border:1px solid var(--garis);border-radius:8px;padding:14px 16px}
+.stat b{display:block;font-size:1.85rem;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.stat small{color:var(--redup);font-size:.84rem}
+.stat.sorot b{color:var(--rumput)}
+.stat.awas b{color:var(--bata)}
+
+/* ---------- Tabel ---------- */
+
+.gulung{overflow-x:auto;background:#fff;border:1px solid var(--garis);border-radius:8px}
+
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--garis);white-space:nowrap}
+th{background:var(--kapur-tua);font-weight:600;font-size:.85rem;position:sticky;top:0}
+tbody tr:last-child td{border-bottom:none}
+td.mono{font-family:var(--mono);font-size:.85rem}
+
+.tanda{font-size:.78rem;font-weight:600;padding:3px 8px;border-radius:4px}
+.tanda.berhasil{background:#e0f0e8;color:#1d5c39}
+.tanda.gagal{background:#fbeae6;color:#8a2d1c}
+
+.alat{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.alat input,.alat select{width:auto;flex:1;min-width:150px;padding:10px 12px;font-size:.92rem}
+
+.tombol-kedua{
+  background:var(--papan);
+  color:#fff;
+  padding:10px 15px;
+  font-size:.9rem;
+}
+.tombol-kedua:hover{background:var(--papan-2)}
+.tombol-kedua.garis{background:transparent;color:var(--papan);border:1.5px solid var(--garis)}
+.tombol-kedua.garis:hover{background:var(--kapur-tua)}
+.tombol-kedua.bahaya{background:var(--bata)}
+.tombol-kedua.bahaya:hover{background:#a53621}
+.tombol-kedua:disabled{opacity:.5;cursor:not-allowed}
+
+.kosong{padding:28px;text-align:center;color:var(--redup);font-size:.94rem}
+
+/* ---------- Impor ---------- */
+
+.langkah{
+  background:#fff;
+  border:1px solid var(--garis);
+  border-radius:8px;
+  padding:18px;
+  margin-bottom:14px;
+}
+.langkah h3{font-size:.98rem;font-weight:600;margin-bottom:6px}
+.langkah p{font-size:.9rem;color:var(--redup);margin-bottom:12px}
+
+.pilihan{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.pilihan label{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  font-weight:400;
+  font-size:.92rem;
+  cursor:pointer;
+  margin:0;
+}
+.pilihan input{width:auto;margin-top:3px;flex-shrink:0}
+.pilihan strong{font-weight:600}
+
+.daftar-salah{
+  background:#fbeae6;
+  border-radius:8px;
+  padding:14px 16px;
+  margin-top:12px;
+  font-size:.88rem;
+  color:#8a2d1c;
+  max-height:220px;
+  overflow-y:auto;
+}
+.daftar-salah li{margin-left:16px;padding:2px 0}
+
+.maju{height:5px;background:var(--kapur-tua);border-radius:3px;overflow:hidden;margin-top:12px}
+.maju div{height:100%;width:0;background:var(--peluit);transition:width .2s}
+
+/* ---------- Pengaturan ---------- */
+
+.pisah{
+  margin:24px 0;
+  border:none;
+  border-top:1px solid var(--garis);
+}
+
+.sakelar{display:flex;gap:10px;align-items:flex-start;margin-bottom:18px}
+.sakelar input{width:auto;margin-top:4px;flex-shrink:0}
+.sakelar label{margin:0;font-weight:400}
+.sakelar strong{display:block;font-weight:600;margin-bottom:2px}
+
+@media(max-width:560px){
+  .panel-isi{padding:16px}
+  .hero{padding:40px 0 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HALAMAN SISWA ============ -->
+<div class="bingkai">
+
+  <header class="hero">
+    <svg class="hero-lapangan" viewBox="0 0 400 130" fill="none" aria-hidden="true">
+      <rect x="4" y="4" width="392" height="122" stroke="#10323f" stroke-width="2"/>
+      <line x1="200" y1="4" x2="200" y2="126" stroke="#10323f" stroke-width="2"/>
+      <circle cx="200" cy="65" r="34" stroke="#10323f" stroke-width="2"/>
+      <rect x="4" y="32" width="46" height="66" stroke="#10323f" stroke-width="2"/>
+      <rect x="350" y="32" width="46" height="66" stroke="#10323f" stroke-width="2"/>
+    </svg>
+    <h1 id="judulHalaman">Ambil Akun Siswa</h1>
+    <p id="pesanPembuka">Memuat…</p>
+  </header>
+
+  <main class="kotak" id="kotakForm">
+    <div class="baris">
+      <label for="pilihKelas">Kelas</label>
+      <select id="pilihKelas" disabled>
+        <option value="">Memuat daftar kelas…</option>
+      </select>
+    </div>
+
+    <div class="baris">
+      <label for="isiNama">Nama lengkap</label>
+      <input type="text" id="isiNama" autocomplete="off" autocapitalize="words"
+             spellcheck="false" placeholder="Contoh: Ahmad Fauzan Ramadhan">
+      <p class="bantu">Tulis seperti di akta kelahiran, bukan nama panggilan.</p>
+    </div>
+
+    <button class="tombol-utama" id="tombolAmbil">Ambil akun</button>
+
+    <div id="wadahPesan"></div>
+  </main>
+
+  <div id="wadahKartu"></div>
+</div>
+
+<button class="tombol-admin" id="tombolAdmin" title="Panel guru" aria-label="Panel guru">
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10.6 3V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</button>
+
+<!-- ============ PANEL ADMIN ============ -->
+<div class="tirai" id="tiraiAdmin">
+  <div class="panel">
+    <div class="panel-atas">
+      <h2 id="judulPanel">Masuk sebagai guru</h2>
+      <button class="tutup" id="tombolTutup" aria-label="Tutup">&times;</button>
+    </div>
+
+    <div class="panel-isi">
+
+      <!-- Login -->
+      <div id="lamanMasuk">
+        <div class="baris">
+          <label for="sandiAdmin">Password</label>
+          <input type="password" id="sandiAdmin" autocomplete="current-password">
+        </div>
+        <button class="tombol-utama" id="tombolMasuk">Masuk</button>
+        <div id="pesanMasuk"></div>
+      </div>
+
+      <!-- Isi panel -->
+      <div id="lamanPanel" style="display:none">
+        <nav class="tab-bar">
+          <button class="tab aktif" data-laman="dasbor">Ringkasan</button>
+          <button class="tab" data-laman="akun">Daftar akun</button>
+          <button class="tab" data-laman="log">Riwayat</button>
+          <button class="tab" data-laman="impor">Impor</button>
+          <button class="tab" data-laman="setelan">Pengaturan</button>
+        </nav>
+
+        <!-- Ringkasan -->
+        <section class="laman tampil" id="lamanDasbor">
+          <div class="statistik" id="kotakStatistik"></div>
+          <div class="alat">
+            <button class="tombol-kedua garis" id="tombolMuatUlang">Muat ulang data</button>
+          </div>
+          <h3 style="font-size:.98rem;margin-bottom:10px">Siswa yang belum mengambil akun</h3>
+          <div class="gulung" id="gulungBelum"></div>
+        </section>
+
+        <!-- Daftar akun -->
+        <section class="laman" id="lamanAkun">
+          <div class="alat">
+            <input type="text" id="cariAkun" placeholder="Cari nama atau email…">
+            <select id="saringKelas"><option value="">Semua kelas</option></select>
+            <button class="tombol-kedua" id="tombolEksporAkun">Unduh Excel</button>
+          </div>
+          <div class="gulung" id="gulungAkun"></div>
+        </section>
+
+        <!-- Riwayat -->
+        <section class="laman" id="lamanLog">
+          <div class="alat">
+            <input type="text" id="cariLog" placeholder="Cari nama atau kelas…">
+            <select id="saringStatus">
+              <option value="">Semua status</option>
+              <option value="BERHASIL">Berhasil</option>
+              <option value="TIDAK DITEMUKAN">Tidak ditemukan</option>
+              <option value="GANDA">Ganda</option>
+            </select>
+            <button class="tombol-kedua" id="tombolEksporLog">Unduh Excel</button>
+            <button class="tombol-kedua bahaya" id="tombolHapusLog">Kosongkan riwayat</button>
+          </div>
+          <div class="gulung" id="gulungLog"></div>
+        </section>
+
+        <!-- Impor -->
+        <section class="laman" id="lamanImpor">
+          <div class="langkah">
+            <h3>1. Ambil templat</h3>
+            <p>Unduh berkas Excel berisi lima kolom yang harus dipakai, lalu isi datanya.</p>
+            <button class="tombol-kedua garis" id="tombolTemplat">Unduh templat Excel</button>
+          </div>
+
+          <div class="langkah">
+            <h3>2. Pilih berkas</h3>
+            <p>Berkas .xlsx atau .csv dengan header di baris pertama: No, Nama, Kelas, Email, Password.</p>
+            <input type="file" id="berkasImpor" accept=".xlsx,.xls,.csv">
+            <div id="pratinjauImpor"></div>
+          </div>
+
+          <div class="langkah" id="langkahKirim" style="display:none">
+            <h3>3. Cara menyimpan</h3>
+            <div class="pilihan">
+              <label>
+                <input type="radio" name="modeImpor" value="replace" checked>
+                <span><strong>Ganti semua</strong><br>Hapus seluruh data lama, isi dengan data baru. Pilihan ini paling aman dari duplikat.</span>
+              </label>
+              <label>
+                <input type="radio" name="modeImpor" value="append">
+                <span><strong>Tambahkan</strong><br>Data lama tetap, data baru ditambah di bawahnya. Nama yang sudah ada di kelas yang sama akan ditolak.</span>
+              </label>
+            </div>
+            <button class="tombol-kedua" id="tombolKirimImpor">Simpan ke spreadsheet</button>
+            <div class="maju" id="majuImpor" style="display:none"><div></div></div>
+            <div id="hasilImpor"></div>
+          </div>
+        </section>
+
+        <!-- Pengaturan -->
+        <section class="laman" id="lamanSetelan">
+          <div class="sakelar">
+            <input type="checkbox" id="setAktif">
+            <label for="setAktif">
+              <strong>Halaman terbuka untuk siswa</strong>
+              Bila dimatikan, siswa tetap bisa membuka halaman tapi tidak bisa mengambil akun.
+            </label>
+          </div>
+
+          <div class="baris">
+            <label for="setJudul">Judul halaman</label>
+            <input type="text" id="setJudul">
+          </div>
+
+          <div class="baris">
+            <label for="setPesan">Kalimat pembuka</label>
+            <input type="text" id="setPesan">
+          </div>
+
+          <div class="baris">
+            <label for="setBatas">Salah berapa kali sebelum petunjuk nama muncul</label>
+            <input type="number" id="setBatas" min="1" max="10">
+            <p class="bantu">Petunjuk hanya menampilkan nama yang mirip dengan ketikan, dengan sebagian huruf disamarkan.</p>
+          </div>
+
+          <div class="baris">
+            <label for="setBatasKlik">Batas percobaan per menit</label>
+            <input type="number" id="setBatasKlik" min="3" max="60">
+          </div>
+
+          <button class="tombol-kedua" id="tombolSimpanSet">Simpan pengaturan</button>
+          <div id="pesanSetelan"></div>
+
+          <hr class="pisah">
+
+          <h3 style="font-size:.98rem;margin-bottom:12px">Ganti password guru</h3>
+          <div class="baris">
+            <label for="sandiLama">Password sekarang</label>
+            <input type="password" id="sandiLama" autocomplete="current-password">
+          </div>
+          <div class="baris">
+            <label for="sandiBaru">Password baru</label>
+            <input type="password" id="sandiBaru" autocomplete="new-password">
+            <p class="bantu">Minimal 6 karakter.</p>
+          </div>
+          <button class="tombol-kedua" id="tombolGantiSandi">Ganti password</button>
+          <div id="pesanSandi"></div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   KONFIGURASI — WAJIB DIISI
+   Tempelkan URL Web App Apps Script (yang berakhiran /exec)
+   ============================================================ */
+var API_URL = 'https://script.google.com/macros/s/AKfycbyse1YQnLy5cUlthLxHMzbIx7ey7wpSdy6uxQ8lQxHMb4G3v_jEv4CFiLedQW8K6sA/exec';
+
+var PANJANG_POTONG = 1200;   // harus sama dengan nilai di Kode.gs
+
+/* ============================================================
+   1. JEMBATAN KE APPS SCRIPT (JSONP)
+   ============================================================ */
+
+var nomorPanggil = 0;
+
+function panggil(param){
+  return new Promise(function(selesai, gagal){
+    if(!API_URL || API_URL.indexOf('TEMPEL_URL') === 0){
+      gagal(new Error('API_URL belum diisi di bagian atas berkas HTML.'));
+      return;
+    }
+    var nama = '__pjok_cb_' + (++nomorPanggil) + '_' + Date.now();
+    var skrip = document.createElement('script');
+    var pewaktu = setTimeout(function(){
+      bersihkan();
+      gagal(new Error('Sambungan ke server terlalu lama. Periksa koneksi internet.'));
+    }, 25000);
+
+    function bersihkan(){
+      clearTimeout(pewaktu);
+      delete window[nama];
+      if(skrip.parentNode) skrip.parentNode.removeChild(skrip);
+    }
+
+    window[nama] = function(data){ bersihkan(); selesai(data); };
+
+    var bagian = [];
+    for(var k in param){
+      if(Object.prototype.hasOwnProperty.call(param, k) && param[k] != null){
+        bagian.push(encodeURIComponent(k) + '=' + encodeURIComponent(param[k]));
+      }
+    }
+    bagian.push('callback=' + nama);
+    skrip.src = API_URL + '?' + bagian.join('&');
+    skrip.onerror = function(){
+      bersihkan();
+      gagal(new Error('Server tidak dapat dihubungi. Pastikan Web App sudah di-deploy untuk "Anyone".'));
+    };
+    document.body.appendChild(skrip);
+  });
+}
+
+/* ============================================================
+   2. ALAT BANTU
+   ============================================================ */
+
+function el(id){ return document.getElementById(id); }
+
+function aman(teks){
+  var d = document.createElement('div');
+  d.textContent = teks == null ? '' : String(teks);
+  return d.innerHTML;
+}
+
+function tampilkanPesan(wadah, teks, jenis){
+  el(wadah).innerHTML = teks
+    ? '<div class="pesan ' + (jenis || 'salah') + '">' + aman(teks) + '</div>'
+    : '';
+}
+
+function idPerangkat(){
+  var kunci = 'pjok_ambil_akun_device';
+  var nilai = '';
+  try{ nilai = localStorage.getItem(kunci) || ''; }catch(e){}
+  if(!nilai){
+    nilai = 'd' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+    try{ localStorage.setItem(kunci, nilai); }catch(e){}
+  }
+  return nilai;
+}
+
+function salin(teks, tombol){
+  var selesai = function(){
+    var awal = tombol.textContent;
+    tombol.textContent = 'Tersalin';
+    setTimeout(function(){ tombol.textContent = awal; }, 1600);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(teks).then(selesai, function(){ salinCadangan(teks, selesai); });
+  }else{
+    salinCadangan(teks, selesai);
+  }
+}
+
+function salinCadangan(teks, selesai){
+  var t = document.createElement('textarea');
+  t.value = teks;
+  t.style.position = 'fixed';
+  t.style.opacity = '0';
+  document.body.appendChild(t);
+  t.select();
+  try{ document.execCommand('copy'); selesai(); }catch(e){}
+  document.body.removeChild(t);
+}
+
+/* ============================================================
+   3. HALAMAN SISWA
+   ============================================================ */
+
+var infoHalaman = { batasPetunjuk: 3 };
+
+function kunciGagal(){ return 'gagal_' + (el('pilihKelas').value || '-'); }
+
+function jumlahGagal(){
+  try{ return parseInt(sessionStorage.getItem(kunciGagal()) || '0', 10); }catch(e){ return 0; }
+}
+
+function setGagal(n){
+  try{ sessionStorage.setItem(kunciGagal(), String(n)); }catch(e){}
+}
+
+function muatInfo(){
+  panggil({ action:'getInfo' }).then(function(r){
+    if(!r || !r.ok){
+      tampilkanPesan('wadahPesan', (r && r.pesan) || 'Data tidak dapat dimuat.', 'salah');
+      return;
+    }
+    infoHalaman = r;
+    el('judulHalaman').textContent = r.judul;
+    document.title = r.judul;
+    el('pesanPembuka').textContent = r.pesan;
+
+    var pilih = el('pilihKelas');
+    if(!r.kelas.length){
+      pilih.innerHTML = '<option value="">Belum ada data kelas</option>';
+      return;
+    }
+    pilih.innerHTML = '<option value="">— pilih kelas —</option>' +
+      r.kelas.map(function(k){ return '<option value="' + aman(k) + '">' + aman(k) + '</option>'; }).join('');
+    pilih.disabled = false;
+
+    if(!r.aktif){
+      tampilkanPesan('wadahPesan', 'Pengambilan akun sedang ditutup oleh guru.', 'salah');
+      el('tombolAmbil').disabled = true;
+    }
+  }).catch(function(e){
+    tampilkanPesan('wadahPesan', e.message, 'salah');
+  });
+}
+
+function ambilAkun(){
+  var kelas = el('pilihKelas').value;
+  var nama  = el('isiNama').value.trim();
+
+  el('wadahKartu').innerHTML = '';
+  tampilkanPesan('wadahPesan', '');
+
+  if(!kelas){ tampilkanPesan('wadahPesan', 'Pilih kelasmu lebih dulu.', 'salah'); return; }
+  if(!nama){ tampilkanPesan('wadahPesan', 'Tulis nama lengkapmu.', 'salah'); return; }
+
+  var tombol = el('tombolAmbil');
+  tombol.disabled = true;
+  tombol.textContent = 'Mencari…';
+
+  panggil({
+    action:'ambilAkun',
+    kelas: kelas,
+    nama: nama,
+    deviceId: idPerangkat(),
+    perangkat: navigator.userAgent
+  }).then(function(r){
+    tombol.disabled = false;
+    tombol.textContent = 'Ambil akun';
+
+    if(r && r.ok){
+      setGagal(0);
+      gambarKartu(r.akun);
+      return;
+    }
+
+    tampilkanPesan('wadahPesan', (r && r.pesan) || 'Terjadi kesalahan.', 'salah');
+
+    if(r && r.kode === 'TIDAK_ADA'){
+      var n = jumlahGagal() + 1;
+      setGagal(n);
+      if(n >= (infoHalaman.batasPetunjuk || 3)) mintaPetunjuk(kelas, nama);
+    }
+  }).catch(function(e){
+    tombol.disabled = false;
+    tombol.textContent = 'Ambil akun';
+    tampilkanPesan('wadahPesan', e.message, 'salah');
+  });
+}
+
+function mintaPetunjuk(kelas, nama){
+  panggil({ action:'getPetunjuk', kelas:kelas, nama:nama, deviceId:idPerangkat() })
+    .then(function(r){
+      if(!r || !r.ok || !r.petunjuk || !r.petunjuk.length) return;
+      var html = '<div class="petunjuk"><h3>Mungkin salah satu ini?</h3>' +
+        '<p class="bantu">Nama yang mirip dengan ketikanmu. Sebagian huruf sengaja ditutup.</p><ul>' +
+        r.petunjuk.map(function(p){ return '<li>' + aman(p) + '</li>'; }).join('') +
+        '</ul></div>';
+      el('wadahPesan').insertAdjacentHTML('beforeend', html);
+    }).catch(function(){});
+}
+
+function gambarKartu(a){
+  var html =
+    '<div class="kartu">' +
+      '<div class="kartu-atas">' +
+        '<div class="kartu-kelas">Kelas ' + aman(a.kelas) + '</div>' +
+        '<div class="kartu-nama">' + aman(a.nama) + '</div>' +
+      '</div>' +
+      '<div class="kartu-isi">' +
+        '<div class="data">' +
+          '<div class="data-label">Email</div>' +
+          '<div class="data-nilai">' +
+            '<span id="nilaiEmail">' + aman(a.email) + '</span>' +
+            '<button class="mini" id="salinEmail">Salin</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="data">' +
+          '<div class="data-label">Password</div>' +
+          '<div class="data-nilai">' +
+            '<span id="nilaiSandi">••••••••</span>' +
+            '<button class="mini" id="lihatSandi">Lihat</button>' +
+            '<button class="mini" id="salinSandi">Salin</button>' +
+          '</div>' +
+        '</div>' +
+        '<p class="catatan-kartu">Catat atau simpan dulu sebelum menutup halaman ini. Kalau lupa, minta bantuan guru.</p>' +
+      '</div>' +
+    '</div>' +
+    '<button class="tombol-lagi" id="tombolLagi">Cari nama lain</button>';
+
+  el('wadahKartu').innerHTML = html;
+
+  var terbuka = false;
+  el('lihatSandi').addEventListener('click', function(){
+    terbuka = !terbuka;
+    el('nilaiSandi').textContent = terbuka ? a.password : '••••••••';
+    this.textContent = terbuka ? 'Tutup' : 'Lihat';
+  });
+  el('salinEmail').addEventListener('click', function(){ salin(a.email, this); });
+  el('salinSandi').addEventListener('click', function(){ salin(a.password, this); });
+  el('tombolLagi').addEventListener('click', function(){
+    el('wadahKartu').innerHTML = '';
+    el('isiNama').value = '';
+    el('isiNama').focus();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+
+  el('wadahKartu').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+el('tombolAmbil').addEventListener('click', ambilAkun);
+el('isiNama').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') ambilAkun();
+});
+el('pilihKelas').addEventListener('change', function(){
+  el('wadahKartu').innerHTML = '';
+  tampilkanPesan('wadahPesan', '');
+});
+
+/* ============================================================
+   4. PANEL ADMIN
+   ============================================================ */
+
+var tokenAdmin = '';
+var dataAkun = [];
+var dataLog  = [];
+var barisImpor = [];
+
+el('tombolAdmin').addEventListener('click', function(){
+  el('tiraiAdmin').classList.add('buka');
+  setTimeout(function(){ el(tokenAdmin ? 'cariAkun' : 'sandiAdmin').focus(); }, 60);
+});
+
+el('tombolTutup').addEventListener('click', function(){
+  el('tiraiAdmin').classList.remove('buka');
+});
+
+el('tiraiAdmin').addEventListener('click', function(e){
+  if(e.target === this) this.classList.remove('buka');
+});
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') el('tiraiAdmin').classList.remove('buka');
+});
+
+/* --- Masuk --- */
+
+function masukAdmin(){
+  var sandi = el('sandiAdmin').value;
+  if(!sandi){ tampilkanPesan('pesanMasuk', 'Isi password lebih dulu.', 'salah'); return; }
+
+  var tombol = el('tombolMasuk');
+  tombol.disabled = true;
+  tombol.textContent = 'Memeriksa…';
+
+  panggil({ action:'adminLogin', password: sandi }).then(function(r){
+    tombol.disabled = false;
+    tombol.textContent = 'Masuk';
+    if(!r || !r.ok){
+      tampilkanPesan('pesanMasuk', (r && r.pesan) || 'Gagal masuk.', 'salah');
+      return;
+    }
+    tokenAdmin = r.token;
+    el('sandiAdmin').value = '';
+    tampilkanPesan('pesanMasuk', '');
+    el('lamanMasuk').style.display = 'none';
+    el('lamanPanel').style.display = 'block';
+    el('judulPanel').textContent = 'Panel guru';
+    muatSemua();
+  }).catch(function(e){
+    tombol.disabled = false;
+    tombol.textContent = 'Masuk';
+    tampilkanPesan('pesanMasuk', e.message, 'salah');
+  });
+}
+
+el('tombolMasuk').addEventListener('click', masukAdmin);
+el('sandiAdmin').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') masukAdmin();
+});
+
+function sesiHabis(r){
+  if(r && r.kode === 'SESI'){
+    tokenAdmin = '';
+    el('lamanPanel').style.display = 'none';
+    el('lamanMasuk').style.display = 'block';
+    el('judulPanel').textContent = 'Masuk sebagai guru';
+    tampilkanPesan('pesanMasuk', 'Sesi berakhir. Masuk kembali.', 'salah');
+    return true;
+  }
+  return false;
+}
+
+/* --- Tab --- */
+
+Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(t){
+  t.addEventListener('click', function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(x){
+      x.classList.remove('aktif');
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.laman'), function(x){
+      x.classList.remove('tampil');
+    });
+    this.classList.add('aktif');
+    var nama = this.dataset.laman;
+    el('laman' + nama.charAt(0).toUpperCase() + nama.slice(1)).classList.add('tampil');
+    if(nama === 'setelan') muatSetelan();
+  });
+});
+
+/* --- Muat data --- */
+
+function muatSemua(){
+  Promise.all([
+    panggil({ action:'adminGetAkun', token: tokenAdmin }),
+    panggil({ action:'adminGetLog',  token: tokenAdmin })
+  ]).then(function(hasil){
+    if(sesiHabis(hasil[0]) || sesiHabis(hasil[1])) return;
+    dataAkun = (hasil[0] && hasil[0].data) || [];
+    dataLog  = (hasil[1] && hasil[1].data) || [];
+    isiSaringKelas();
+    gambarDasbor();
+    gambarTabelAkun();
+    gambarTabelLog();
+  }).catch(function(e){
+    alert('Gagal memuat data: ' + e.message);
+  });
+}
+
+el('tombolMuatUlang').addEventListener('click', muatSemua);
+
+/* --- Ringkasan --- */
+
+function pernahAmbil(){
+  var set = {};
+  dataLog.forEach(function(l){
+    if(l.status === 'BERHASIL'){
+      set[normalKunci(l.nama) + '||' + normalKunci(l.kelas)] = true;
+    }
+  });
+  return set;
+}
+
+function normalKunci(s){
+  return String(s == null ? '' : s).trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function gambarDasbor(){
+  var sudah = pernahAmbil();
+  var belum = dataAkun.filter(function(a){
+    return !sudah[normalKunci(a.nama) + '||' + normalKunci(a.kelas)];
+  });
+  var gagal = dataLog.filter(function(l){ return l.status !== 'BERHASIL'; }).length;
+
+  el('kotakStatistik').innerHTML =
+    '<div class="stat"><b>' + dataAkun.length + '</b><small>Akun terdaftar</small></div>' +
+    '<div class="stat sorot"><b>' + (dataAkun.length - belum.length) + '</b><small>Sudah mengambil</small></div>' +
+    '<div class="stat"><b>' + belum.length + '</b><small>Belum mengambil</small></div>' +
+    '<div class="stat ' + (gagal ? 'awas' : '') + '"><b>' + gagal + '</b><small>Percobaan gagal</small></div>';
+
+  if(!belum.length){
+    el('gulungBelum').innerHTML = '<p class="kosong">' +
+      (dataAkun.length ? 'Semua siswa sudah mengambil akunnya.' : 'Belum ada data akun. Impor lebih dulu.') +
+      '</p>';
+    return;
+  }
+
+  el('gulungBelum').innerHTML =
+    '<table><thead><tr><th>Nama</th><th>Kelas</th><th>Email</th></tr></thead><tbody>' +
+    belum.map(function(a){
+      return '<tr><td>' + aman(a.nama) + '</td><td>' + aman(a.kelas) +
+             '</td><td class="mono">' + aman(a.email) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+}
+
+/* --- Daftar akun --- */
+
+function isiSaringKelas(){
+  var unik = {};
+  dataAkun.forEach(function(a){ if(a.kelas) unik[a.kelas] = true; });
+  var daftar = Object.keys(unik).sort(function(x, y){
+    return x.localeCompare(y, 'id', { numeric:true });
+  });
+  el('saringKelas').innerHTML = '<option value="">Semua kelas</option>' +
+    daftar.map(function(k){ return '<option value="' + aman(k) + '">' + aman(k) + '</option>'; }).join('');
+}
+
+function gambarTabelAkun(){
+  var cari  = el('cariAkun').value.trim().toLowerCase();
+  var kelas = el('saringKelas').value;
+  var sudah = pernahAmbil();
+
+  var tampil = dataAkun.filter(function(a){
+    if(kelas && a.kelas !== kelas) return false;
+    if(!cari) return true;
+    return (a.nama + ' ' + a.email).toLowerCase().indexOf(cari) !== -1;
+  });
+
+  if(!tampil.length){
+    el('gulungAkun').innerHTML = '<p class="kosong">Tidak ada data yang cocok.</p>';
+    return;
+  }
+
+  el('gulungAkun').innerHTML =
+    '<table><thead><tr><th>No</th><th>Nama</th><th>Kelas</th><th>Email</th><th>Password</th><th>Status</th></tr></thead><tbody>' +
+    tampil.map(function(a){
+      var ambil = sudah[normalKunci(a.nama) + '||' + normalKunci(a.kelas)];
+      return '<tr>' +
+        '<td>' + aman(a.no) + '</td>' +
+        '<td>' + aman(a.nama) + '</td>' +
+        '<td>' + aman(a.kelas) + '</td>' +
+        '<td class="mono">' + aman(a.email) + '</td>' +
+        '<td class="mono">' + aman(a.password) + '</td>' +
+        '<td><span class="tanda ' + (ambil ? 'berhasil' : 'gagal') + '">' +
+          (ambil ? 'Sudah' : 'Belum') + '</span></td>' +
+      '</tr>';
+    }).join('') + '</tbody></table>';
+}
+
+el('cariAkun').addEventListener('input', gambarTabelAkun);
+el('saringKelas').addEventListener('change', gambarTabelAkun);
+
+/* --- Riwayat --- */
+
+function gambarTabelLog(){
+  var cari   = el('cariLog').value.trim().toLowerCase();
+  var status = el('saringStatus').value;
+
+  var tampil = dataLog.filter(function(l){
+    if(status && l.status !== status) return false;
+    if(!cari) return true;
+    return (l.nama + ' ' + l.kelas).toLowerCase().indexOf(cari) !== -1;
+  });
+
+  if(!tampil.length){
+    el('gulungLog').innerHTML = '<p class="kosong">Belum ada riwayat pengambilan.</p>';
+    return;
+  }
+
+  el('gulungLog').innerHTML =
+    '<table><thead><tr><th>Waktu</th><th>Kelas</th><th>Nama diketik</th><th>Status</th><th>Perangkat</th></tr></thead><tbody>' +
+    tampil.map(function(l){
+      return '<tr>' +
+        '<td class="mono">' + aman(l.waktu) + '</td>' +
+        '<td>' + aman(l.kelas) + '</td>' +
+        '<td>' + aman(l.nama) + '</td>' +
+        '<td><span class="tanda ' + (l.status === 'BERHASIL' ? 'berhasil' : 'gagal') + '">' +
+          aman(l.status) + '</span></td>' +
+        '<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis">' + aman(l.perangkat) + '</td>' +
+      '</tr>';
+    }).join('') + '</tbody></table>';
+}
+
+el('cariLog').addEventListener('input', gambarTabelLog);
+el('saringStatus').addEventListener('change', gambarTabelLog);
+
+el('tombolHapusLog').addEventListener('click', function(){
+  if(!confirm('Kosongkan seluruh riwayat pengambilan? Data yang dihapus tidak bisa dikembalikan.')) return;
+  panggil({ action:'adminResetLog', token: tokenAdmin }).then(function(r){
+    if(sesiHabis(r)) return;
+    alert((r && r.pesan) || 'Selesai.');
+    muatSemua();
+  }).catch(function(e){ alert('Gagal: ' + e.message); });
+});
+
+/* ============================================================
+   5. EKSPOR & TEMPLAT EXCEL
+   ============================================================ */
+
+function unduhExcel(barisData, namaSheet, namaBerkas){
+  var ws = XLSX.utils.aoa_to_sheet(barisData);
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, namaSheet);
+  XLSX.writeFile(wb, namaBerkas);
+}
+
+function capWaktu(){
+  var d = new Date(), p = function(n){ return (n < 10 ? '0' : '') + n; };
+  return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes());
+}
+
+el('tombolTemplat').addEventListener('click', function(){
+  unduhExcel([
+    ['No', 'Nama', 'Kelas', 'Email', 'Password'],
+    [1, 'Ahmad Fauzan Ramadhan', '6A', 'ahmad.fauzan@sekolah.sch.id', 'Fauzan2026'],
+    [2, 'Siti Nur Aisyah', '6A', 'siti.aisyah@sekolah.sch.id', 'Aisyah2026'],
+    [3, 'Bagas Prasetyo', '5B', 'bagas.prasetyo@sekolah.sch.id', 'Bagas2026']
+  ], 'Akun', 'templat-akun-siswa.xlsx');
+});
+
+el('tombolEksporAkun').addEventListener('click', function(){
+  if(!dataAkun.length){ alert('Belum ada data akun untuk diunduh.'); return; }
+  var sudah = pernahAmbil();
+  unduhExcel(
+    [['No', 'Nama', 'Kelas', 'Email', 'Password', 'Status']].concat(
+      dataAkun.map(function(a){
+        return [a.no, a.nama, a.kelas, a.email, a.password,
+          sudah[normalKunci(a.nama) + '||' + normalKunci(a.kelas)] ? 'Sudah' : 'Belum'];
+      })
+    ), 'Akun', 'daftar-akun-' + capWaktu() + '.xlsx');
+});
+
+el('tombolEksporLog').addEventListener('click', function(){
+  if(!dataLog.length){ alert('Belum ada riwayat untuk diunduh.'); return; }
+  unduhExcel(
+    [['Waktu', 'Kelas', 'Nama Diketik', 'Status', 'Device ID', 'Perangkat']].concat(
+      dataLog.map(function(l){
+        return [l.waktu, l.kelas, l.nama, l.status, l.deviceId, l.perangkat];
+      })
+    ), 'Log', 'riwayat-ambil-akun-' + capWaktu() + '.xlsx');
+});
+
+/* ============================================================
+   6. IMPOR EXCEL
+   ============================================================ */
+
+el('berkasImpor').addEventListener('change', function(e){
+  var berkas = e.target.files && e.target.files[0];
+  barisImpor = [];
+  el('langkahKirim').style.display = 'none';
+  el('hasilImpor').innerHTML = '';
+
+  if(!berkas){ el('pratinjauImpor').innerHTML = ''; return; }
+
+  var pembaca = new FileReader();
+  pembaca.onload = function(ev){
+    try{
+      var wb = XLSX.read(new Uint8Array(ev.target.result), { type:'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var aoa = XLSX.utils.sheet_to_json(ws, { header:1, defval:'', raw:false });
+      periksaBerkas(aoa);
+    }catch(err){
+      el('pratinjauImpor').innerHTML =
+        '<div class="pesan salah">Berkas tidak terbaca: ' + aman(err.message) + '</div>';
+    }
+  };
+  pembaca.readAsArrayBuffer(berkas);
+});
+
+function periksaBerkas(aoa){
+  if(!aoa || aoa.length < 2){
+    el('pratinjauImpor').innerHTML =
+      '<div class="pesan salah">Berkas kosong atau hanya berisi baris header.</div>';
+    return;
+  }
+
+  var wajib = ['no', 'nama', 'kelas', 'email', 'password'];
+  var header = aoa[0].map(function(h){ return String(h).trim().toLowerCase(); });
+  var indeks = {};
+  var hilang = [];
+
+  wajib.forEach(function(k){
+    var i = header.indexOf(k);
+    if(i === -1) hilang.push(k);
+    indeks[k] = i;
+  });
+
+  if(hilang.length){
+    el('pratinjauImpor').innerHTML =
+      '<div class="pesan salah">Kolom yang belum ada: ' + aman(hilang.join(', ')) +
+      '. Gunakan templat agar nama kolomnya persis.</div>';
+    return;
+  }
+
+  barisImpor = [];
+  for(var i = 1; i < aoa.length; i++){
+    var r = aoa[i];
+    var isi = {
+      no:       String(r[indeks.no] || '').trim(),
+      nama:     String(r[indeks.nama] || '').trim(),
+      kelas:    String(r[indeks.kelas] || '').trim(),
+      email:    String(r[indeks.email] || '').trim(),
+      password: String(r[indeks.password] || '').trim()
+    };
+    if(isi.nama || isi.kelas || isi.email || isi.password) barisImpor.push(isi);
+  }
+
+  if(!barisImpor.length){
+    el('pratinjauImpor').innerHTML = '<div class="pesan salah">Tidak ada baris berisi data.</div>';
+    return;
+  }
+
+  var contoh = barisImpor.slice(0, 5);
+  el('pratinjauImpor').innerHTML =
+    '<div class="pesan info">' + barisImpor.length + ' baris terbaca. Lima baris pertama:</div>' +
+    '<div class="gulung" style="margin-top:10px">' +
+    '<table><thead><tr><th>No</th><th>Nama</th><th>Kelas</th><th>Email</th><th>Password</th></tr></thead><tbody>' +
+    contoh.map(function(b){
+      return '<tr><td>' + aman(b.no) + '</td><td>' + aman(b.nama) + '</td><td>' + aman(b.kelas) +
+             '</td><td class="mono">' + aman(b.email) + '</td><td class="mono">' + aman(b.password) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+
+  el('langkahKirim').style.display = 'block';
+}
+
+el('tombolKirimImpor').addEventListener('click', function(){
+  if(!barisImpor.length){ alert('Pilih berkas lebih dulu.'); return; }
+
+  var mode = document.querySelector('input[name=modeImpor]:checked').value;
+  var tanya = mode === 'replace'
+    ? 'Seluruh data akun lama akan dihapus dan diganti dengan ' + barisImpor.length + ' baris baru. Lanjutkan?'
+    : barisImpor.length + ' baris akan ditambahkan di bawah data yang sudah ada. Lanjutkan?';
+  if(!confirm(tanya)) return;
+
+  var tombol = el('tombolKirimImpor');
+  var maju = el('majuImpor');
+  tombol.disabled = true;
+  tombol.textContent = 'Mengirim…';
+  maju.style.display = 'block';
+  el('hasilImpor').innerHTML = '';
+
+  var teks = JSON.stringify(barisImpor);
+  var potongan = [];
+  for(var i = 0; i < teks.length; i += PANJANG_POTONG){
+    potongan.push(teks.slice(i, i + PANJANG_POTONG));
+  }
+
+  var imporId = 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  var urut = Promise.resolve();
+
+  potongan.forEach(function(isi, idx){
+    urut = urut.then(function(){
+      return panggil({
+        action:'imporPotong', token: tokenAdmin,
+        imporId: imporId, indeks: idx, data: isi
+      }).then(function(r){
+        if(sesiHabis(r)) throw new Error('Sesi berakhir.');
+        if(!r || !r.ok) throw new Error((r && r.pesan) || 'Potongan gagal terkirim.');
+        maju.firstElementChild.style.width = Math.round(((idx + 1) / potongan.length) * 90) + '%';
+      });
+    });
+  });
+
+  urut.then(function(){
+    return panggil({
+      action:'imporSelesai', token: tokenAdmin,
+      imporId: imporId, jumlah: potongan.length, mode: mode
+    });
+  }).then(function(r){
+    maju.firstElementChild.style.width = '100%';
+    tombol.disabled = false;
+    tombol.textContent = 'Simpan ke spreadsheet';
+    if(sesiHabis(r)) return;
+
+    if(r && r.ok){
+      el('hasilImpor').innerHTML = '<div class="pesan info">' + aman(r.pesan) + '</div>';
+      el('berkasImpor').value = '';
+      el('pratinjauImpor').innerHTML = '';
+      el('langkahKirim').style.display = 'none';
+      barisImpor = [];
+      muatSemua();
+      muatInfo();
+    }else{
+      var html = '<div class="pesan salah">' + aman((r && r.pesan) || 'Impor gagal.') + '</div>';
+      if(r && r.rincian && r.rincian.length){
+        html += '<div class="daftar-salah"><ul>' +
+          r.rincian.map(function(s){ return '<li>' + aman(s) + '</li>'; }).join('') +
+          '</ul></div>';
+      }
+      el('hasilImpor').innerHTML = html;
+    }
+  }).catch(function(e){
+    tombol.disabled = false;
+    tombol.textContent = 'Simpan ke spreadsheet';
+    el('hasilImpor').innerHTML = '<div class="pesan salah">' + aman(e.message) + '</div>';
+  }).then(function(){
+    setTimeout(function(){
+      maju.style.display = 'none';
+      maju.firstElementChild.style.width = '0';
+    }, 800);
+  });
+});
+
+/* ============================================================
+   7. PENGATURAN
+   ============================================================ */
+
+function muatSetelan(){
+  panggil({ action:'adminGetSet', token: tokenAdmin }).then(function(r){
+    if(sesiHabis(r)) return;
+    if(!r || !r.ok) return;
+    var d = r.data || {};
+    el('setAktif').checked   = String(d.aktif).toUpperCase() !== 'FALSE';
+    el('setJudul').value     = d.judulHalaman || '';
+    el('setPesan').value     = d.pesanPembuka || '';
+    el('setBatas').value     = d.batasPetunjuk || 3;
+    el('setBatasKlik').value = d.rateLimitMaks || 12;
+  }).catch(function(){});
+}
+
+el('tombolSimpanSet').addEventListener('click', function(){
+  var isi = {
+    aktif:         el('setAktif').checked ? 'TRUE' : 'FALSE',
+    judulHalaman:  el('setJudul').value.trim(),
+    pesanPembuka:  el('setPesan').value.trim(),
+    batasPetunjuk: el('setBatas').value,
+    rateLimitMaks: el('setBatasKlik').value
+  };
+  panggil({ action:'adminSimpanSet', token: tokenAdmin, data: JSON.stringify(isi) })
+    .then(function(r){
+      if(sesiHabis(r)) return;
+      tampilkanPesan('pesanSetelan', (r && r.pesan) || 'Gagal menyimpan.', r && r.ok ? 'info' : 'salah');
+      if(r && r.ok) muatInfo();
+    }).catch(function(e){
+      tampilkanPesan('pesanSetelan', e.message, 'salah');
+    });
+});
+
+el('tombolGantiSandi').addEventListener('click', function(){
+  var lama = el('sandiLama').value;
+  var baru = el('sandiBaru').value;
+  if(!lama || !baru){
+    tampilkanPesan('pesanSandi', 'Isi kedua kolom password.', 'salah');
+    return;
+  }
+  panggil({ action:'adminGantiSandi', token: tokenAdmin, lama: lama, baru: baru })
+    .then(function(r){
+      if(sesiHabis(r)) return;
+      tampilkanPesan('pesanSandi', (r && r.pesan) || 'Gagal.', r && r.ok ? 'info' : 'salah');
+      if(r && r.ok){ el('sandiLama').value = ''; el('sandiBaru').value = ''; }
+    }).catch(function(e){
+      tampilkanPesan('pesanSandi', e.message, 'salah');
+    });
+});
+
+/* ============================================================
+   8. MULAI
+   ============================================================ */
+
+muatInfo();
+</script>
+</body>
+</html>
